@@ -1,0 +1,18 @@
+TODO:
+- R/W access to all directories.
+- Check sufficient space for processing and writing new images.
+- Lock (mutex) file/filename when processing new images to prevent duplicates.
+- If a file for processing has no Raw asset, send 404.
+- If requested flavor doesn't exist use fallback? or 404?
+- Make .env file
+  - Raw directory path
+  - Processed directory path
+  - default cache lifetime
+  - enable/disable HTTPS
+- Allow request to delete Raw image.
+- Logging of failed processing jobs
+
+Potential features:
+- List of default sizes to generate when new assets are found.
+- Internal cache.
+- Allow request to invalidate cache.
