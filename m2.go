@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,6 +15,10 @@ import (
 	bimg "gopkg.in/h2non/bimg.v1"
 )
 
+var (
+	conf *config
+)
+
 /**
  * Serve raw image butes.
  */
@@ -23,7 +28,7 @@ func rawImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params
 		return
 	}
 
-	fileName := "/tmp/" + p.ByName("rawImage")
+	fileName := conf.RawDir + "/" + p.ByName("rawImage")
 
 	// check if file exissts
 	img, err := os.Open(fileName)
@@ -88,7 +93,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	//  extension := parts[0][3]
 	//  flavor := parts[0][2]
 
-	fileName := "/tmp/" + p.ByName("procImage")
+	fileName := conf.ProcDir + "/" + p.ByName("procImage")
 
 	// check if file exissts
 	img, err := os.Open(fileName)
@@ -101,7 +106,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		// w.WriteHeader(404)
 		// fmt.Fprintf(w, "file not found.")
 		// Create byte array of that can hold the image file.
-		fileName = "/tmp/" + parts[0][1] + "." + parts[0][3]
+		fileName = conf.RawDir + "/" + parts[0][1] + "." + parts[0][3]
 		fmt.Printf("fileName: %v\n", fileName)
 		img, err := os.Open(fileName)
 		defer img.Close()
@@ -135,6 +140,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 			return
 		}
 
+		// Processed image can be served even if it isn't written to file system.
 		// Send custom headers and raw image bytes.
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", strconv.Itoa(int(len(newImage))))
@@ -142,12 +148,18 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		w.Header().Set("Cache-Control", "max-age=2592000")           // 30 days
 		w.Write(newImage)
 
+		ioutil.WriteFile(conf.ProcDir+"/"+p.ByName("procImage"), newImage, 0755)
+
 	}
 
 }
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.WriteHeader(200)
 	fmt.Fprint(w, "ok\n")
+}
+
+func init() {
+	conf = newConf()
 }
 
 func main() {
