@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -53,42 +54,101 @@ func NewImageController() *ImageController {
 
 func (ic ImageController) GetRawImage(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-}
+	byte, err := json.Marshal(r.Header.Get("Forwarded")) // <-------- here !
 
-func (ic ImageController) GetProcImage(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Println(r.RequestURI)
-
-	// Regex: (.*)\.([^\.]*)\.([^\.]*)$
-	re := regexp.MustCompile(`(.*)\.([^\.]*)\.([^\.]*)$`)
-	parts := re.FindAllStringSubmatch(p.ByName("procImage"), 1)
-	fmt.Println(len(parts[0]))
-	// If the requestURI does not match the pattern send error.
-	if parts == nil || len(parts[0]) != 4 {
-		// Log this.
-		fmt.Fprintf(w, "Invalid image request\n")
-
-		// Return message to browser
-		w.WriteHeader(200)
-		fmt.Fprintf(w, "The requested resource '%s' is invalid.\n", parts[0][0])
+	if err != nil {
 		return
 	}
 
-	filename := parts[0][1]
-	extension := parts[0][3]
-	flavor := parts[0][2]
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(byte))
+	fmt.Println(string(byte))
 
-	fmt.Println("Extension:", parts[0][3])
-	fmt.Println("AIMS flavor:", parts[0][2])
-	fmt.Println("File name:", parts[0][1])
+}
 
-	w.WriteHeader(200)
-	fmt.Fprintf(w, "Filename: %s\n", filename)
-	fmt.Fprintf(w, "Extension: %s\n", extension)
-	fmt.Fprintf(w, "Flavor: %s\n", flavor)
+func (ic ImageController) GetProcImage(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+
+	//	byte, err := json.Marshal(r.Header.Get("Forwarded")) // <-------- here !
+	byte, err := json.Marshal(r) // <-------- here !
+	fmt.Printf("%v\n", r)
+	if err != nil {
+		return
+	}
+	fmt.Println("j request")
+	fmt.Println(string(byte))
+
+	//	fmt.Println(r.RequestURI)
+	//
+	// // Regex: (.*)\.([^\.]*)\.([^\.]*)$
+	// re := regexp.MustCompile(`(.*)\.([^\.]*)\.([^\.]*)$`)
+	// parts := re.FindAllStringSubmatch(p.ByName("procImage"), 1)
+	// fmt.Println(len(parts[0]))
+	// // If the requestURI does not match the pattern send error.
+	// if parts == nil || len(parts[0]) != 4 {
+	// 	// Log this.
+	// 	fmt.Fprintf(w, "Invalid image request\n")
+	//
+	// 	// Return message to browser
+	// 	w.WriteHeader(200)
+	// 	fmt.Fprintf(w, "The requested resource '%s' is invalid.\n", parts[0][0])
+	// 	return
+	// }
+	//
+	// filename := parts[0][1]
+	// extension := parts[0][3]
+	// flavor := parts[0][2]
+	//
+	// fmt.Println("Extension:", parts[0][3])
+	// fmt.Println("AIMS flavor:", parts[0][2])
+	// fmt.Println("File name:", parts[0][1])
+	//
+	// w.WriteHeader(200)
+	// fmt.Fprintf(w, "Filename: %s\n", filename)
+	// fmt.Fprintf(w, "Extension: %s\n", extension)
+	// fmt.Fprintf(w, "Flavor: %s\n", flavor)
 
 	// Look for file on disk.
 	// If it is there, direct the user there (ServerFile?)
 	// If it is not, create it, and then direct the user.
+}
+
+func imageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	// fmt.Println("http.Request")
+	// fmt.Printf("%v", r)
+
+	// Regex: (.*)\.([^\.]*)\.([^\.]*)$
+	re := regexp.MustCompile(`(.*)\.([^\.]*)\.([^\.]*)$`)
+	parts := re.FindAllStringSubmatch(p.ByName("test"), 1)
+
+	fmt.Println("parts")
+	fmt.Printf("%v\n\n", parts)
+
+	// If the requestURI does not match the pattern send error.
+	if parts == nil || len(parts[0]) != 4 {
+		// Log this.
+		w.WriteHeader(200)
+
+		fmt.Fprintf(w, "Invalid image request\n")
+
+		// Return message to browser
+		fmt.Fprintf(w, "The requested resource '%s' is invalid.\n", p.ByName("test"))
+		return
+	}
+
+	// filename := parts[0][1]
+	// extension := parts[0][3]
+	// flavor := parts[0][2]
+	//
+	// fmt.Println("Extension:", parts[0][3])
+	// fmt.Println("AIMS flavor:", parts[0][2])
+	// fmt.Println("File name:", parts[0][1])
+	//
+	// //	w.WriteHeader(200)
+	// fmt.Fprintf(w, "Filename: %s\n", filename)
+	// fmt.Fprintf(w, "Extension: %s\n", extension)
+	// fmt.Fprintf(w, "Flavor: %s\n", flavor)
+
+	http.Redirect(w, r, "/j/testimage.flavor.jpg", 302)
 
 }
 
@@ -102,6 +162,7 @@ func main() {
 
 	r.GET("/i/:rawImage", ic.GetRawImage)
 	r.GET("/j/:procImage", ic.GetProcImage)
+	r.GET("/k/:test", imageHandler)
 
 	http.ListenAndServe("localhost:9001", r)
 
