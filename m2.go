@@ -94,6 +94,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	img, err := os.Open(fileName)
 	defer img.Close()
 
+	// If the image doesn't exist. Is there cleaner way to test?
 	if err != nil {
 		// Image not found try to create it.
 		// fmt.Printf("PROC: File '%s' not found\n", fileName)

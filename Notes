@@ -9,10 +9,13 @@ TODO:
   - Processed directory path
   - default cache lifetime
   - enable/disable HTTPS
+- Make configuration file with flavors.
 - Allow request to delete Raw image.
 - Logging of failed processing jobs
 
 Potential features:
 - List of default sizes to generate when new assets are found.
 - Internal cache.
+- Make configuration reloadable on the fly
+- Create a flavor API to list/search
 - Allow request to invalidate cache.
