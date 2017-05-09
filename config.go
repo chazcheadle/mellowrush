@@ -12,7 +12,7 @@ type config struct {
 	Hostname string `yaml:"hostname"`
 	Port     string `yaml:"port"`
 	RawDir   string `yaml:"rawDir"`
-	ProcDir  string `yaml:"prodDir"`
+	ProcDir  string `yaml:"procDir"`
 }
 
 type flavorMap struct {

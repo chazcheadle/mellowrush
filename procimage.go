@@ -56,7 +56,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		img, err := os.Open(fileName)
 		defer img.Close()
 		if err != nil {
-			fmt.Println("Error opening Raw asset.")
+			fmt.Printf("Error opening Raw asset: %s.\n", fileName)
 		}
 		fileInfo, _ := img.Stat()
 		var size = fileInfo.Size()
@@ -72,9 +72,15 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 
 		// Process image according to flavor.
 		// newImage, err := processImage(fileName, parts[0][2])
-		options := getImageOptions(parts[0][2])
+		options, err := parseImageRequest(parts[0][2])
+		if err != nil {
+			fmt.Println("Error parsing image processing parameters.")
+			return
+		}
 		fmt.Printf("%v\n", options)
-		newImage, err := bimg.NewImage(bytes).Resize(100, 100)
+
+		// Send resize request
+		newImage, err := bimg.NewImage(bytes).Resize(options.height, options.width)
 		if err != nil {
 			fmt.Println("Error processing file.")
 			return

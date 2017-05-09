@@ -19,7 +19,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func init() {
 	conf = getConf()
+	fmt.Printf("%v\n", conf)
 	flavors = getFlavors()
+	fmt.Println("init")
 }
 
 func main() {
@@ -37,7 +39,7 @@ func main() {
 	// Processed image route.
 	router.HEAD("/j/:procImage", procImageHandler)
 	router.GET("/j/:procImage", procImageHandler)
-
+	fmt.Println("start...")
 	http.ListenAndServe(conf.Hostname+":"+conf.Port, router)
 
 }
