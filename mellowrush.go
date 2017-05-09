@@ -19,9 +19,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func init() {
 	conf = getConf()
-	fmt.Printf("%v\n", conf)
 	flavors = getFlavors()
-	fmt.Println("init")
 }
 
 func main() {
@@ -33,13 +31,13 @@ func main() {
 	router.HEAD("/", indexHandler)
 
 	// Original image route.
-	router.HEAD("/i/:origImage", origImageHandler)
-	router.GET("/i/:origImage", origImageHandler)
+	router.HEAD(conf.OrigRoot+"/:origImage", origImageHandler)
+	router.GET(conf.OrigRoot+"/:origImage", origImageHandler)
 
 	// Processed image route.
-	router.HEAD("/j/:procImage", procImageHandler)
-	router.GET("/j/:procImage", procImageHandler)
-	fmt.Println("start...")
+	router.HEAD(conf.ProcRoot+"/:procImage", procImageHandler)
+	router.GET(conf.ProcRoot+"/:procImage", procImageHandler)
+	fmt.Println("start server...")
 	http.ListenAndServe(conf.Hostname+":"+conf.Port, router)
 
 }

@@ -19,7 +19,6 @@ import (
  * Process image based on flavor and serve the image bytes.
  */
 func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-
 	if p.ByName("procImage") == "" {
 		return
 	}
@@ -39,7 +38,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	//  flavor := parts[0][2]
 
 	fileName := conf.ProcDir + "/" + p.ByName("procImage")
-
+	fmt.Printf("filename: %v", fileName)
 	// check if file exissts
 	img, err := os.Open(fileName)
 	defer img.Close()
@@ -107,7 +106,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 
 	} else {
 		// Serve file
-		fmt.Println("Serving existing asset.")
+		fmt.Printf("Serving existing asset: %s", fileName)
 		if err != nil {
 			fmt.Printf("Error opening processed image asset: %s.\n", fileName)
 			return

@@ -1,4 +1,6 @@
 hostname: "localhost"
 port: "9001"
 origDir: "/tmp/i"
+origRoot: "/i"
 procDir: "/tmp/j"
+procRoot: "/j"
