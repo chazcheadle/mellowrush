@@ -1,4 +1,4 @@
 hostname: "localhost"
 port: "9001"
-rawDir: "/tmp/i"
+origDir: "/tmp/i"
 procDir: "/tmp/j"

@@ -50,20 +50,22 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		// fmt.Printf("PROC: File '%s' not found\n", fileName)
 		// w.WriteHeader(404)
 		// fmt.Fprintf(w, "file not found.")
-		// Create byte array of that can hold the image file.
-		fileName = conf.RawDir + "/" + parts[0][1] + "." + parts[0][3]
-		fmt.Printf("fileName: %v\n", fileName)
-		img, err := os.Open(fileName)
-		defer img.Close()
+
+		// Try to open the original image.
+		fileName = conf.OrigDir + "/" + parts[0][1] + "." + parts[0][3]
+		origImg, err := os.Open(fileName)
+		defer origImg.Close()
 		if err != nil {
-			fmt.Printf("Error opening Raw asset: %s.\n", fileName)
+			fmt.Printf("Error opening original image asset: %s.\n", fileName)
 		}
-		fileInfo, _ := img.Stat()
+
+		// Create byte array of that can hold the image file.
+		fileInfo, _ := origImg.Stat()
 		var size = fileInfo.Size()
 		bytes := make([]byte, size)
 
 		// read file into bytes
-		buffer := bufio.NewReader(img)
+		buffer := bufio.NewReader(origImg)
 		_, err = buffer.Read(bytes)
 		if err != nil {
 			fmt.Println("PROC: Error reading buffer into byte array.")
@@ -94,7 +96,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		}
 
 		// Processed image can be served even if it isn't written to file system.
-		// Send custom headers and raw image bytes.
+		// Send custom headers and image bytes.
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", strconv.Itoa(int(len(newImage))))
 		w.Header().Set("ETag", strconv.Itoa(int(time.Now().Unix()))) // Make uniquer
@@ -131,7 +133,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		}
 
 		// Processed image can be served even if it isn't written to file system.
-		// Send custom headers and raw image bytes.
+		// Send custom headers and image bytes.
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", strconv.Itoa(int(size)))
 		w.Header().Set("ETag", strconv.Itoa(int(time.Now().Unix()))) // Make uniquer

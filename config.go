@@ -11,7 +11,7 @@ import (
 type config struct {
 	Hostname string `yaml:"hostname"`
 	Port     string `yaml:"port"`
-	RawDir   string `yaml:"rawDir"`
+	OrigDir  string `yaml:"origDir"`
 	ProcDir  string `yaml:"procDir"`
 }
 
