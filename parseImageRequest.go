@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type options struct {
 	height    int
 	width     int
@@ -11,7 +9,6 @@ type options struct {
 }
 
 func parseImageRequest(flavor string) (*options, error) {
-	fmt.Println("Parsing image options.")
 	//	flavor_parts := strings.Split(flavor, ";")
 	// Test for correct number of arguments
 	// 	if len(flavor_parts) == 5 {

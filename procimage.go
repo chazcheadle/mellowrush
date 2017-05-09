@@ -77,10 +77,9 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 			fmt.Println("Error parsing image processing parameters.")
 			return
 		}
-		fmt.Printf("%v\n", options)
 
 		// Send resize request
-		newImage, err := bimg.NewImage(bytes).Resize(options.height, options.width)
+		newImage, err := bimg.NewImage(bytes).ResizeAndCrop(options.height, options.width)
 		if err != nil {
 			fmt.Println("Error processing file.")
 			return
@@ -104,6 +103,40 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 
 		ioutil.WriteFile(conf.ProcDir+"/"+p.ByName("procImage"), newImage, 0755)
 
+	} else {
+		// Serve file
+		fmt.Println("Serving existing asset.")
+		if err != nil {
+			fmt.Printf("Error opening processed image asset: %s.\n", fileName)
+			return
+		}
+		fileInfo, _ := img.Stat()
+		var size = fileInfo.Size()
+		bytes := make([]byte, size)
+
+		// read file into bytes
+		buffer := bufio.NewReader(img)
+		_, err = buffer.Read(bytes)
+		if err != nil {
+			fmt.Println("PROC: Error reading buffer into byte array.")
+			return
+		}
+
+		contentType := http.DetectContentType(bytes)
+		// Verify that the file is an image file.
+		if !strings.Contains(contentType, "image") {
+			fmt.Printf("PROC: content-type = %s\n", contentType)
+			fmt.Printf("PROC: The requested file '%s' does not appear to be a valid image file.\n", fileName)
+			return
+		}
+
+		// Processed image can be served even if it isn't written to file system.
+		// Send custom headers and raw image bytes.
+		w.Header().Set("Content-Type", contentType)
+		w.Header().Set("Content-Length", strconv.Itoa(int(size)))
+		w.Header().Set("ETag", strconv.Itoa(int(time.Now().Unix()))) // Make uniquer
+		w.Header().Set("Cache-Control", "max-age=2592000")           // 30 days
+		w.Write(bytes)
 	}
 
 }
