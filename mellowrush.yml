@@ -1,6 +1,17 @@
 hostname: "localhost"
 port: "9001"
-origDir: "/tmp/i"
-origRoot: "/i"
-procDir: "/tmp/j"
-procRoot: "/j"
+origdir: "/tmp/i"
+origroot: "/i"
+procdir: "/tmp/j"
+procroot: "/j"
+defaults:
+  algorithm: Bicubic
+  quality: 70
+  fallback-original: TRUE
+  max-retries: 0
+  max-age: 2592000
+  store-custom: FALSE
+flavors:
+  flavor-320-240: "320;240;7;70;0"
+  flavor-640-480: "640;480;7;70;0"
+  flavor-1080-720: "1080;720;7;70;0"

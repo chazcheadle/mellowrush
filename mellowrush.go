@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	conf    *config
-	flavors *flavorMap
+	conf *config
+
+//	flavors *flavorMap
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -19,7 +20,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func init() {
 	conf = getConf()
-	flavors = getFlavors()
 }
 
 func main() {

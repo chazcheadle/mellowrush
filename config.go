@@ -11,25 +11,24 @@ import (
 type config struct {
 	Hostname string `yaml:"hostname"`
 	Port     string `yaml:"port"`
-	OrigDir  string `yaml:"origDir"`
-	OrigRoot string `yaml:"origRoot"`
-	ProcDir  string `yaml:"procDir"`
-	ProcRoot string `yaml:"procRoot"`
-}
-
-type flavorMap struct {
-	Flavors map[string]string
+	OrigDir  string `yaml:"origdir"`
+	OrigRoot string `yaml:"origroot"`
+	ProcDir  string `yaml:"procdir"`
+	ProcRoot string `yaml:"procroot"`
+	Defaults struct {
+		Algorithm         string `yaml:"algorithm"`
+		Quality           int    `yaml:"quality"`
+		FallbackOoriginal bool   `yaml:"fallback-original"`
+		MaxAge            int    `yaml:"max-age"`
+		StoreCustom       bool   `yaml:"store-custom"`
+	} `yaml:"defaults"`
+	Flavors map[string]string `yaml:"flavors"`
 }
 
 func getConf() *config {
 	conf := parseConfigFile()
+	fmt.Printf("%v\n", conf)
 	return conf
-}
-
-func getFlavors() *flavorMap {
-	flavorConf := parseFlavorsFile()
-	fmt.Printf("%v\n", flavorConf)
-	return flavorConf
 }
 
 func parseConfigFile() *config {
@@ -60,35 +59,4 @@ func parseConfigFile() *config {
 		return conf
 	}
 	return conf
-}
-
-func parseFlavorsFile() *flavorMap {
-
-	flavorFile := "flavors.yml"
-	if len(os.Args[1:]) > 0 {
-		flavorFile = os.Args[1]
-	}
-	flavors := &flavorMap{}
-
-	f, err := os.Open(flavorFile)
-	defer f.Close()
-	if err != nil {
-		//Log error.
-		fmt.Println("Couldn't open flavor config file.")
-		return flavors
-	}
-	d, err := ioutil.ReadAll(f)
-	if err != nil {
-		// Log error.
-		fmt.Println("Couldn't read flavor config file.")
-		return flavors
-	}
-	err = yaml.Unmarshal(d, flavors)
-	if err != nil {
-		// Log error.
-		fmt.Println("Couldn't unmarshal flavor config file yaml.")
-		return flavors
-	}
-	return flavors
-
 }

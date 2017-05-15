@@ -38,7 +38,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 	//  flavor := parts[0][2]
 
 	fileName := conf.ProcDir + "/" + p.ByName("procImage")
-	fmt.Printf("filename: %v", fileName)
+	fmt.Printf("PROC: requeseted filename: %v\n", fileName)
 	// check if file exissts
 	img, err := os.Open(fileName)
 	defer img.Close()
@@ -80,7 +80,9 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		}
 
 		// Send resize request
-		newImage, err := bimg.NewImage(bytes).ResizeAndCrop(options.height, options.width)
+		// replace with bimgOpts?
+		newImage, err := bimg.NewImage(bytes).ResizeAndCrop(options.Height, options.Width)
+		//newImage, err := bimg.NewImage(bytes).Process(options)
 		if err != nil {
 			fmt.Println("Error processing file.")
 			return
@@ -102,11 +104,13 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		w.Header().Set("Cache-Control", "max-age=2592000")           // 30 days
 		w.Write(newImage)
 
-		ioutil.WriteFile(conf.ProcDir+"/"+p.ByName("procImage"), newImage, 0755)
-
+		// Check if the image should be written to disk.
+		if conf.Defaults.StoreCustom {
+			ioutil.WriteFile(conf.ProcDir+"/"+p.ByName("procImage"), newImage, 0755)
+		}
 	} else {
 		// Serve file
-		fmt.Printf("Serving existing asset: %s", fileName)
+		fmt.Printf("Serving existing asset: %s\n", fileName)
 		if err != nil {
 			fmt.Printf("Error opening processed image asset: %s.\n", fileName)
 			return
@@ -135,8 +139,8 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		// Send custom headers and image bytes.
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", strconv.Itoa(int(size)))
-		w.Header().Set("ETag", strconv.Itoa(int(time.Now().Unix()))) // Make uniquer
-		w.Header().Set("Cache-Control", "max-age=2592000")           // 30 days
+		w.Header().Set("ETag", strconv.Itoa(int(time.Now().Unix())))                   // Make uniquer
+		w.Header().Set("Cache-Control", "max-age="+strconv.Itoa(conf.Defaults.MaxAge)) // 30 days
 		w.Write(bytes)
 	}
 
