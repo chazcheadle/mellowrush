@@ -10,7 +10,7 @@ defaults:
   fallback-original: TRUE
   max-retries: 0
   max-age: 2592000
-  store-custom: FALSE
+  store-custom: TRUE
 flavors:
   flavor-320-240: "320;240;7;70;0"
   flavor-640-480: "640;480;7;70;0"

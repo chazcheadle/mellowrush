@@ -15,32 +15,56 @@ import (
 	bimg "gopkg.in/h2non/bimg.v1"
 )
 
+type ImageObj struct {
+	Filename    string
+	ContentType string
+	ByteData    []byte
+	size        int
+}
+
 /**
  * Process image based on flavor and serve the image bytes.
  */
 func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if p.ByName("procImage") == "" {
+		fmt.Println("No image name given in request.")
+		errorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 
 	re := regexp.MustCompile(`(.*)\.([^\.]*)\.([^\.]*)$`)
 	parts := re.FindAllStringSubmatch(p.ByName("procImage"), 1)
 
-	// If the requestURI does not match the pattern send error.
-	if len(parts[0]) != 4 {
-		w.WriteHeader(200)
-		fmt.Fprintf(w, "Invalid image request\n")
-		return
-	}
-
 	//  filename := parts[0][1]
 	//  extension := parts[0][3]
 	//  flavor := parts[0][2]
 
-	fileName := conf.ProcDir + "/" + p.ByName("procImage")
-	fmt.Printf("PROC: requeseted filename: %v\n", fileName)
-	// check if file exissts
-	img, err := os.Open(fileName)
+	// If the requestURI does not match the pattern send error.
+	if len(parts[0]) != 4 {
+		fmt.Println("Invalid image request. Incorrect format.")
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	image := &ImageObj{}
+	image.Filename = p.ByName("procImage")
+
+	// Check if the file has already been generated.
+	filePath := conf.ProcDir + "/" + image.Filename
+	fmt.Printf("PROC: requeseted filename: %v\n", image.Filename)
+	img, err := os.Open(filePath)
+	if err != nil {
+		// File not found.
+	} else {
+		// Check if the original file asset exists.
+		filePath = conf.OrigDir + "/" + parts[0][1] + "." + parts[0][3]
+		img, err := os.Open(filePath)
+		if err != nil {
+			// File is not present. Return error.
+			errorHandler(w, r, http.StatusNotFound)
+		}
+	}
+
 	defer img.Close()
 
 	// If the image doesn't exist. Is there cleaner way to test?
@@ -52,7 +76,7 @@ func procImageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Param
 
 		// Try to open the original image.
 		fileName = conf.OrigDir + "/" + parts[0][1] + "." + parts[0][3]
-		origImg, err := os.Open(fileName)
+		origImg, err := os.Open(image.Filename)
 		defer origImg.Close()
 		if err != nil {
 			fmt.Printf("Error opening original image asset: %s.\n", fileName)

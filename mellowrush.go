@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/urfave/negroni"
 )
 
 var (
 	conf *config
-
-//	flavors *flavorMap
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -37,7 +36,13 @@ func main() {
 	// Processed image route.
 	router.HEAD(conf.ProcRoot+"/:procImage", procImageHandler)
 	router.GET(conf.ProcRoot+"/:procImage", procImageHandler)
-	fmt.Println("start server...")
-	http.ListenAndServe(conf.Hostname+":"+conf.Port, router)
+
+	// fmt.Println("start server...")
+	// http.ListenAndServe(conf.Hostname+":"+conf.Port, router)
+
+	n := negroni.New()
+	n.Use(negroni.NewLogger())
+	n.UseHandler(router)
+	http.ListenAndServe(conf.Hostname+":"+conf.Port, n)
 
 }
